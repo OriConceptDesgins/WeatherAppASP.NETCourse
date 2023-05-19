@@ -1,0 +1,22 @@
+﻿@using WeatherApp.Models
+@model CityWeather
+
+@{
+    string backgroundColor = string.Empty;
+    if (Model.TemperatureF < 44) { backgroundColor = "bg-info"; }
+    if ((Model.TemperatureF >= 44) && (Model.TemperatureF <= 74)) { backgroundColor = "bg-success"; }
+    if (Model.TemperatureF > 74) { backgroundColor = "bg-warning"; }
+
+}
+<div class="card-header @backgroundColor">
+    <br>@Model.CityName
+</div>
+<div class="card-body ">
+    <div class="d-flex justify-content-center">
+        ID:   &nbsp; @Model.CityCode
+        <br>
+        Time:&nbsp;  @Model.DateAndTime
+        <br>
+        Temperature:&nbsp;   @Model.TemperatureF
+    </div>
+</div>
