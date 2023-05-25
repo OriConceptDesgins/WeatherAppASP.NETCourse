@@ -1,71 +1,40 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics.CodeAnalysis;
 using WeatherApp.Models;
+using WeatherService.Interfaces;
 
 namespace WeatherApp.Controllers
 {
     
     public class WeatherController : Controller
     {
-        List<CityWeather> cityWeatherList = new List<CityWeather>
+        private readonly IWeatherService _weatherService;
+
+        public WeatherController(IWeatherService weatherService)
         {
+            _weatherService = weatherService;
+        }
 
-            new CityWeather
-            {
-                CityCode = "1",
-                CityName = "New York City",
-                DateAndTime = DateTime.Now,
-                TemperatureF = 48
-            },
-
-            new CityWeather
-            {
-                CityCode = "666",
-                CityName = "Lux City",
-                DateAndTime = DateTime.Now,
-                TemperatureF = 32
-            },
-
-            new CityWeather
-            {
-                CityCode = "38044",
-                CityName = "Kyiv",
-                DateAndTime = DateTime.Now,
-                TemperatureF = 56
-            },
-
-        };
-
-        List<CityWeather> cityWeatherSelection= new List<CityWeather>{};
-        
         [Route ("/")]
         public IActionResult WeatherDisplayAll() 
         {
             if (Request.Method != "GET") { return BadRequest("App only processs GET requests"); }
-            if (HttpContext.GetRouteValue("City") == null)
-            {
-                return View("WeatherDisplay", cityWeatherList);
-            }
-            return BadRequest();
+            return View("WeatherDisplay",_weatherService.GetWeatherDetails());
         }
 
 
 
         [Route("/Weather/{CityCode}")]
-        public IActionResult WeatherDisplay()
+        public IActionResult WeatherDisplay(string CityCode)
         {
+            CityWeather? CityWeatherViaCityCode = _weatherService.GetWeatherByCityCode(CityCode);
             if (Request.Method != "GET") { return BadRequest("App only processs GET requests"); }
-            cityWeatherSelection.Clear();
-
-            foreach (CityWeather cityWeather in cityWeatherList) 
+            if (CityWeatherViaCityCode != null)
             {
-                string? cityCode = Convert.ToString(HttpContext.GetRouteValue("CityCode"));
-                if (cityWeather.CityCode == cityCode) 
-                {
-                    cityWeatherSelection.Add(cityWeather);
-                    return View("WeatherDisplay", cityWeatherSelection);
-                }
+                return View("WeatherDisplay", new List<CityWeather>(){ CityWeatherViaCityCode });
             }
-            return BadRequest("Bad Request, Wrong City code");
+            return BadRequest("Invalid City Code");
+            
         }
     }
 }
